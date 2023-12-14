@@ -1,0 +1,33 @@
+<!-- about.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Про проект{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="mb-4">{{ project_info.project_title }}</h1>
+            <p>{{ project_info.project_description }}</p>
+            <h3 class="mt-4">Технічний стек:</h3>
+            <ul>
+                {% for tech in project_info.project_tech_stack %}
+                <li>{{ tech }}</li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4">
+                <h3>Посилання:</h3>
+                <ul>
+                    {% for link, url in project_info.project_links.items() %}
+                    <li><a href="{{ url }}" target="_blank">{{ link }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+
+        </div>
+    </div>
+</div>
+{% endblock %}
