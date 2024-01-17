@@ -1,0 +1,29 @@
+<!-- portfolio.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Портфоліо{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-4">Моє портфоліо</h1>
+    <div class="row">
+        {% if not portfolio_info %}
+            <p>У вас ще немає проектів у портфоліо.</p>
+        {% else %}
+            {% for project in portfolio_info %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ project.image }}" class="card-img-top" alt="{{ project.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ project.title }}</h5>
+                            <p class="card-text">{{ project.description }}</p>
+                            <p class="card-text"><small class="text-muted">Використані інструменти: {{ ', '.join(project.tools) }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
