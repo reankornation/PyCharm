@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Portfolio{% endblock %}</title>
+
+    <!-- Підключення Bootstrap (замініть URL на актуальний, якщо потрібно) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+{% include "header.html" %}
+
+<div id="content">
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    <div>
+        <div class="row">
+            <div class="col text-justify text-center justify-content-between">OS: {{ data["operating_system"] }}</div>
+            <div class="col text-justify text-center justify-content-between">Date: {{ data["user_agent"] }}</div>
+            <div class="col text-justify text-center justify-content-between">User agent: {{ data["time_now"] }}</div>
+        </div>
+    </div>
+</footer>
+
+<!-- Підключення скриптів Bootstrap (замініть URL на актуальний, якщо потрібно) -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
