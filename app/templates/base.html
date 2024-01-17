@@ -13,9 +13,20 @@
 <body>
 {% include "header.html" %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="list-group">
+            {% for category, message in messages %}
+                <li class="list-group-item list-group-item-{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
 <div id="content">
     {% block content %}{% endblock %}
 </div>
+
 
 <footer>
     <div>
@@ -25,7 +36,10 @@
             <div class="col text-justify text-center justify-content-between">User agent: {{ data["time_now"] }}</div>
         </div>
     </div>
+
+
 </footer>
+
 
 <!-- Підключення скриптів Bootstrap (замініть URL на актуальний, якщо потрібно) -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

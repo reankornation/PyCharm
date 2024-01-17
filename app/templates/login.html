@@ -1,15 +1,20 @@
 {% extends 'base.html' %}
+{% from 'render_field.html' import render_field %}
 
-{% block title %}Логін{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
- <form method="POST" action="{{ url_for('login') }}">
-        <label for="username">Логін:</label>
-        <input type="text" name="username" id="username" required>
-        <br>
-        <label for="password">Пароль:</label>
-        <input type="password" name="password" id="password" required>
-        <br>
-        <input type="submit" value="Увійти">
-    </form>
+  <form method="POST" action="/login" novalidate>
+    {{ form.csrf_token }}
+
+    {{ render_field(form.username) }}
+
+    {{ render_field(form.password) }}
+
+    {{ render_field(form.remember) }}
+
+    <input type="submit" value="Увійти">
+  </form>
 {% endblock %}
+
+
