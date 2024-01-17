@@ -1,9 +1,11 @@
 from app import app
 from flask import request, render_template, session, redirect, url_for, make_response
 import platform
+
 from os.path import dirname, realpath, join
 from datetime import datetime
 from flask import current_app
+from .forms import LoginForm
 import json
 
 app.secret_key = b"abmobusd"
@@ -11,7 +13,7 @@ app.secret_key = b"abmobusd"
 
 @app.route('/')
 def home():
-    operating_system = platform.system()
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -24,7 +26,7 @@ def home():
 
 @app.route('/page2')
 def page2():
-    operating_system = platform.system()
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -37,7 +39,7 @@ def page2():
 
 @app.route('/page3')
 def page3():
-    operating_system = platform.system()
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -50,7 +52,7 @@ def page3():
 
 @app.route("/page4", methods=["GET"])
 def page4():
-    operating_system = platform.system()
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -64,9 +66,14 @@ def page4():
     return render_template("page4.html", data=data, skills=skills, skill=skill, skills_len=len(skills))
 
 
-@app.route('/login', methods=["GET", "POST"])
+from flask import flash
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    operating_system = platform.system()
+    form = LoginForm()
+
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -75,24 +82,29 @@ def login():
         "time_now": time_now,
     }
 
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        remember = form.remember.data
 
         dataJsonPath = join(dirname(realpath(__file__)), 'auth_data.json')
         with open(dataJsonPath, 'r', encoding='utf-8') as file:
             auth_data = json.load(file)
 
         if username in auth_data and auth_data[username] == password:
-            session['username'] = username
-            return redirect(url_for('info'))
+            if remember:
+                session['username'] = username
+                return redirect(url_for('info'))
+        else:
+            flash('Invalid username or password', 'error')
+            return redirect(url_for('login'))
 
-    return render_template("login.html", data=data)
+    return render_template("login.html", data=data, form=form)
 
 
 @app.route('/info', methods=['GET'])
 def info():
-    operating_system = platform.system()
+    operating_system = platform.platform()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     data = {
@@ -110,25 +122,13 @@ def info():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/logout', methods=['GET'])
 def logout():
-    operating_system = platform.system()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
-
     username = session.get('username', None)
-
     if username:
-        session.pop(username, None)
-        return render_template('login.html', username=username, data=data)
-    else:
-        return redirect(url_for('login'))
-
+        session.pop('username')
+    return redirect(url_for('login'))
 
 
 @app.route('/add_cookie', methods=["GET", "POST"])
@@ -161,7 +161,7 @@ def change_password():
         new_password = request.form['new_password']
 
         username = session['username']
-        dataJsonPath = platform.path.join(current_app.root_path, 'auth_data.json')
+        dataJsonPath = os.path.join(current_app.root_path, 'auth_data.json')
 
         with open(dataJsonPath, 'r', encoding='utf-8') as file:
             auth_data = json.load(file)
