@@ -1,69 +1,48 @@
-from app import app
-from flask import request, render_template, session, redirect, url_for, make_response
+from app import app, db
+from flask import session, make_response
 import platform
-
 from os.path import dirname, realpath, join
 from datetime import datetime
 from flask import current_app
 from .forms import LoginForm
 import json
+from flask import render_template, request, redirect, url_for
+from .forms import TodoForm
+from .models import Todo
 
-app.secret_key = b"abmobusd"
+
+def get_data():
+    operating_system = platform.platform()
+    user_agent = request.headers.get('User-Agent')
+    time_now = datetime.now()
+    return {
+        "operating_system": operating_system,
+        "user_agent": user_agent,
+        "time_now": time_now,
+    }
 
 
 @app.route('/')
 def home():
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
-    return render_template('page1.html', data=data)
+    return render_template('page1.html', data=get_data())
 
 
 @app.route('/page2')
 def page2():
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
-    return render_template('page2.html', data=data)
+    return render_template('page2.html', data=get_data())
 
 
 @app.route('/page3')
 def page3():
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
-    return render_template('page3.html', data=data)
+    return render_template('page3.html', data=get_data())
 
 
 @app.route("/page4", methods=["GET"])
 def page4():
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
     skills = ["Photo takin", "Music playin", "c++ manual testin"]
     skill = request.args.get("skill", None)
 
-    return render_template("page4.html", data=data, skills=skills, skill=skill, skills_len=len(skills))
+    return render_template("page4.html", data=get_data(), skills=skills, skill=skill, skills_len=len(skills))
 
 
 from flask import flash
@@ -72,15 +51,6 @@ from flask import flash
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
 
     if form.validate_on_submit():
         username = form.username.data
@@ -99,26 +69,17 @@ def login():
             flash('Invalid username or password', 'error')
             return redirect(url_for('login'))
 
-    return render_template("login.html", data=data, form=form)
+    return render_template("login.html", data=get_data(), form=form)
 
 
 @app.route('/info', methods=['GET'])
 def info():
-    operating_system = platform.platform()
-    user_agent = request.headers.get('User-Agent')
-    time_now = datetime.now()
-    data = {
-        "operating_system": operating_system,
-        "user_agent": user_agent,
-        "time_now": time_now,
-    }
-
     username = session.get('username', None)
 
     if username:
         cookies = request.cookies
 
-        return render_template('info.html', username=username, data=data, cookies=cookies)
+        return render_template('info.html', username=username, data=get_data(), cookies=cookies)
     else:
         return redirect(url_for('login'))
 
@@ -175,3 +136,43 @@ def change_password():
         return redirect(url_for('info'))
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/todo', methods=['GET', 'POST'])
+def todo():
+    form = TodoForm()
+
+    if form.validate_on_submit():
+        new_todo = Todo(title=form.title.data, description=form.description.data)
+        db.session.add(new_todo)
+        db.session.commit()
+        flash('Todo added successfully!', 'success')
+        return redirect(url_for('todo'))
+
+    todos = Todo.query.all()
+    return render_template('todo.html', data=get_data(), form=form, todos=todos)
+
+
+@app.route('/todo/<int:todo_id>', methods=['GET', 'POST'])
+def edit_todo(todo_id):
+    todo = Todo.query.get_or_404(todo_id)
+    form = TodoForm(obj=todo)
+
+    if form.validate_on_submit():
+        todo.title = form.title.data
+        todo.description = form.description.data
+        todo.status = form.status.data
+        db.session.commit()
+        flash('Todo updated successfully!', 'success')
+        return redirect(url_for('todo'))
+
+    return render_template('edit_todo.html', data=get_data(), form=form, todo=todo)
+
+
+@app.route('/todo/delete/<int:todo_id>', methods=['POST'])
+def delete_todo(todo_id):
+    todo = Todo.query.get_or_404(todo_id)
+    db.session.delete(todo)
+    db.session.commit()
+    flash('Todo deleted successfully!', 'success')
+    return redirect(url_for('todo'))
