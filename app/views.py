@@ -1,16 +1,15 @@
-from app import app, db
-from flask import session, make_response
-import platform
-from os.path import dirname, realpath, join
-from datetime import datetime
-from flask import current_app
-from .forms import LoginForm
 import json
+import platform
+from datetime import datetime
+
+from flask import current_app
 from flask import render_template, request, redirect, url_for
+from flask import session, make_response
+
+from app import app, db
+from .forms import LoginForm, RegistrationForm
 from .forms import TodoForm
-from .models import Todo
-from .forms import FeedbackForm
-from .models import Feedback
+from .models import Todo, User
 
 
 def get_data():
@@ -55,35 +54,55 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        username = form.username.data
+        email = form.email.data
         password = form.password.data
         remember = form.remember.data
+        user = User.query.filter(User.email == email).first()
 
-        dataJsonPath = join(dirname(realpath(__file__)), 'auth_data.json')
-        with open(dataJsonPath, 'r', encoding='utf-8') as file:
-            auth_data = json.load(file)
+        if user is None or not user.verify_password(password):
+            flash("invalid email or password!", "danger")
+            return redirect(url_for("login"))
 
-        if username in auth_data and auth_data[username] == password:
-            if remember:
-                session['username'] = username
-                return redirect(url_for('info'))
-        else:
-            flash('Invalid username or password', 'error')
-            return redirect(url_for('login'))
+        flash("Login succesfull!", "success")
+        if remember:
+            session["user"] = {}
+            session["user"]['username'] = user.username
+            session["user"]['email'] = user.email
+            return redirect(url_for("info"))
+        return redirect(url_for("login"))
 
     return render_template("login.html", data=get_data(), form=form)
 
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+        email = form.email.data
+        username = form.username.data
+        password = form.password.data
+        user = User()
+        user.email = email
+        user.username = username
+        user.password = password
+
+        db.session.add(user)
+        db.session.commit()
+        flash("Register succesfull!", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html", data=get_data(), form=form)
+
+
 @app.route('/info', methods=['GET'])
 def info():
-    username = session.get('username', None)
-
-    if username:
+    user = session.get('user', None)
+    if user:
         cookies = request.cookies
+        return render_template('info.html', data=get_data(), cookies=cookies)
 
-        return render_template('info.html', username=username, data=get_data(), cookies=cookies)
-    else:
-        return redirect(url_for('login'))
+    return redirect(url_for('login'))
 
 
 @app.route('/logout', methods=['GET'])
@@ -124,7 +143,7 @@ def change_password():
         new_password = request.form['new_password']
 
         username = session['username']
-        dataJsonPath = os.path.join(current_app.root_path, 'auth_data.json')
+        dataJsonPath = platform.path.join(current_app.root_path, 'auth_data.json')
 
         with open(dataJsonPath, 'r', encoding='utf-8') as file:
             auth_data = json.load(file)
@@ -180,21 +199,7 @@ def delete_todo(todo_id):
     return redirect(url_for('todo'))
 
 
-
-@app.route('/feedback', methods=['GET', 'POST'])
-def feedback():
-    form = FeedbackForm()
-    if form.validate_on_submit():
-        feedback_entry = Feedback(
-            name=form.name.data,
-            email=form.email.data,
-            message=form.message.data
-        )
-        db.session.add(feedback_entry)
-        db.session.commit()
-        flash('Feedback submitted successfully!', 'success')
-        return redirect(url_for('feedback'))
-
-    feedback_entries = Feedback.query.all()
-    operating_system = "Your OS"  # Отримайте ОС з якої відбувається доступ
-    return render_template('feedback.html', form=form, feedback_entries=feedback_entries, data={'operating_system': operating_system})
+@app.route("/users")
+def users():
+    all_users = User.query.all()
+    return render_template('users.html', all_users=all_users, data=get_data())
