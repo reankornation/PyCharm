@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+    <h1>Leave Feedback</h1>
+    <form method="post" action="{{ url_for('feedback') }}">
+        {{ form.csrf_token }}
+        {{ form.name.label }} {{ form.name }}
+        {{ form.email.label }} {{ form.email }}
+        {{ form.message.label }} {{ form.message }}
+        <button type="submit">Submit Feedback</button>
+    </form>
+
+    <h2>All Feedback</h2>
+    <ul>
+        {% for entry in feedback_entries %}
+            <li>{{ entry.name }} - {{ entry.email }}: {{ entry.message }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
