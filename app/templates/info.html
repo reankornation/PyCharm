@@ -4,11 +4,11 @@
 
 {% block content %}
     <h1>Дані користувача</h1>
-    <p>Привіт, {{ username }}!</p>
+    <p>Привіт, {{ session["user"]['username'] }}!</p>
     <p>Операційна система: {{ data.operating_system }}</p>
     <p>User-Agent: {{ data.user_agent }}</p>
     <p>Час зараз: {{ data.time_now }}</p>
-    <a href="/logout">Вийти</a>
+    <a href="{{ url_for('logout') }}">Вийти</a>
 
 
 

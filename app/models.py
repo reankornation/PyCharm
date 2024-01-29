@@ -1,3 +1,5 @@
+from flask_bcrypt import generate_password_hash, check_password_hash
+
 from app import db
 
 
@@ -8,9 +10,20 @@ class Todo(db.Model):
     status = db.Column(db.Integer, server_default='0', nullable=True)
 
 
-
-class Feedback(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    password_hash = db.Column(db.String(60), nullable=False)
+
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute.')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)

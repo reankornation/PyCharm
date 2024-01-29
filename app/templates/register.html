@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from 'render_field.html' import render_field %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{{ url_for('register') }}" novalidate>
+        {{ form.csrf_token }}
+
+
+        {{ render_field(form.username) }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.confirm_password) }}
+
+
+        <input type="submit" value="Зареєструватися">
+    </form>
+{% endblock %}
+
+

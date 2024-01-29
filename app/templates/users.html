@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% from 'render_field.html' import render_field %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">email</th>
+            <th scope="col">username</th>
+            <th scope="col">image_file</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in all_users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.image_file }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+
