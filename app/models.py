@@ -1,6 +1,10 @@
-from flask_bcrypt import generate_password_hash, check_password_hash
+import datetime
 
-from app import db
+from flask_bcrypt import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from sqlalchemy import func
+
+from app import db, login_manager
 
 
 class Todo(db.Model):
@@ -10,12 +14,19 @@ class Todo(db.Model):
     status = db.Column(db.Integer, server_default='0', nullable=True)
 
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(id)
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password_hash = db.Column(db.String(60), nullable=False)
+    about_me = db.Column(db.String(256), nullable=True)
+    last_seen = db.Column(db.DateTime, server_default=func.now(), nullable=False)
 
     @property
     def password(self):

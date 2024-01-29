@@ -4,16 +4,12 @@
 
 {% block content %}
     <h1>Дані користувача</h1>
-    <p>Привіт, {{ session["user"]['username'] }}!</p>
+    <p>Привіт, {{ current_user.username }}!</p>
     <p>Операційна система: {{ data.operating_system }}</p>
     <p>User-Agent: {{ data.user_agent }}</p>
     <p>Час зараз: {{ data.time_now }}</p>
     <a href="{{ url_for('logout') }}">Вийти</a>
 
-
-
-
-    <!-- Виведення інформації про кукі -->
     <h2>Інформація про кукі:</h2>
     <table>
         <tr>
@@ -40,11 +36,5 @@
         <input type="submit" value="Додати кукі">
     </form>
     <hr>
-    <form action="/change_password" method="POST">
-        <label for="new_password">Новий пароль:</label>
-        <input type="password" id="new_password" name="new_password" required>
-        <br>
-        <input type="submit" value="Змінити пароль">
-    </form>
     <a href="/delete_all_cookies">Видалити всі кукі</a>
 {% endblock %}

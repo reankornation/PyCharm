@@ -1,19 +1,20 @@
-import json
 import platform
 from datetime import datetime
 
-from flask import current_app
 from flask import render_template, request, redirect, url_for
 from flask import session, make_response
+from flask_login import login_required, current_user, logout_user, login_user
+from flask import current_app as app
+from werkzeug.utils import secure_filename
 
-from app import app, db
-from .forms import LoginForm, RegistrationForm
+from app import db
+from .forms import LoginForm, RegistrationForm, ChangePassword, UpdateAccountForm
 from .forms import TodoForm
 from .models import Todo, User
 
 
 def get_data():
-    operating_system = platform.platform()
+    operating_system = platform.system()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     return {
@@ -51,6 +52,8 @@ from flask import flash
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('account'))
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -65,10 +68,8 @@ def login():
 
         flash("Login succesfull!", "success")
         if remember:
-            session["user"] = {}
-            session["user"]['username'] = user.username
-            session["user"]['email'] = user.email
-            return redirect(url_for("info"))
+            login_user(user, remember=True)
+            return redirect(url_for("account"))
         return redirect(url_for("login"))
 
     return render_template("login.html", data=get_data(), form=form)
@@ -76,6 +77,8 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('info'))
     form = RegistrationForm()
 
     if form.validate_on_submit():
@@ -96,24 +99,21 @@ def register():
 
 
 @app.route('/info', methods=['GET'])
+@login_required
 def info():
-    user = session.get('user', None)
-    if user:
-        cookies = request.cookies
-        return render_template('info.html', data=get_data(), cookies=cookies)
-
-    return redirect(url_for('login'))
+    cookies = request.cookies
+    return render_template('info.html', data=get_data(), cookies=cookies)
 
 
 @app.route('/logout', methods=['GET'])
+@login_required
 def logout():
-    username = session.get('username', None)
-    if username:
-        session.pop('username')
+    logout_user()
     return redirect(url_for('login'))
 
 
 @app.route('/add_cookie', methods=["GET", "POST"])
+@login_required
 def add_cookie():
     if 'username' in session:
         key = request.form['key']
@@ -127,6 +127,7 @@ def add_cookie():
 
 
 @app.route('/delete_all_cookies', methods=['GET'])
+@login_required
 def delete_all_cookies():
     if 'username' in session:
         response = make_response(redirect(url_for('info')))
@@ -138,25 +139,18 @@ def delete_all_cookies():
 
 
 @app.route('/change_password', methods=['POST'])
+@login_required
 def change_password():
-    if 'username' in session:
-        new_password = request.form['new_password']
-
-        username = session['username']
-        dataJsonPath = platform.path.join(current_app.root_path, 'auth_data.json')
-
-        with open(dataJsonPath, 'r', encoding='utf-8') as file:
-            auth_data = json.load(file)
-
-        if username in auth_data:
-            auth_data[username] = new_password
-
-            with open(dataJsonPath, 'w', encoding='utf-8') as file:
-                json.dump(auth_data, file, ensure_ascii=False, indent=4)
-
-        return redirect(url_for('info'))
-    else:
-        return redirect(url_for('login'))
+    form = ChangePassword()
+    if form.validate_on_submit():
+        # user = User.query.get(current_user.id)
+        if not current_user.verify_password(form.old_password.data):
+            flash("Old password is incorect", "danger")
+            return redirect(url_for('account'))
+    current_user.password = form.new_password.data
+    db.session.commit()
+    flash("Password changed!", "success")
+    return redirect(url_for('account'))
 
 
 @app.route('/todo', methods=['GET', 'POST'])
@@ -200,6 +194,52 @@ def delete_todo(todo_id):
 
 
 @app.route("/users")
+@login_required
 def users():
     all_users = User.query.all()
     return render_template('users.html', all_users=all_users, data=get_data())
+
+
+@app.route("/account")
+@login_required
+def account():
+    form = ChangePassword()
+    update_form = UpdateAccountForm()
+    update_form.new_email.data = current_user.email
+    update_form.new_username.data = current_user.username
+    update_form.about_me.data = current_user.about_me
+    return render_template('account.html', title='Account', data=get_data(), form=form, update_form=update_form)
+
+
+@app.route('/change_login', methods=['POST'])
+@login_required
+def change_login():
+    form = UpdateAccountForm()
+    if not form.validate_on_submit():
+        # if not current_user.verify_password(form.old_password.data):
+        #     flash("Old password is incorect", "danger")
+        return render_template('account.html', title='Account', data=get_data(), form=ChangePassword(),
+                               update_form=form)
+        # return redirect(url_for('account'))
+    current_user.username = form.new_username.data
+    current_user.email = form.new_email.data
+    current_user.about_me = form.about_me.data
+    profile_photo = form.profile_picture.data
+    if profile_photo:
+        filename = secure_filename(profile_photo.filename)
+        filepath = platform.path.join('app/static/images/', filename)
+        profile_photo.save(filepath)
+        current_user.image_file = filename
+
+    db.session.commit()
+    flash("Your data was changed!", "success")
+    return redirect(url_for('account'))
+
+
+@app.after_request
+def update_user_last_seen(resp):
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now()
+        db.session.commit()
+        
+    return resp
