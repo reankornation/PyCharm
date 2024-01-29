@@ -9,6 +9,8 @@ import json
 from flask import render_template, request, redirect, url_for
 from .forms import TodoForm
 from .models import Todo
+from .forms import FeedbackForm
+from .models import Feedback
 
 
 def get_data():
@@ -176,3 +178,23 @@ def delete_todo(todo_id):
     db.session.commit()
     flash('Todo deleted successfully!', 'success')
     return redirect(url_for('todo'))
+
+
+
+@app.route('/feedback', methods=['GET', 'POST'])
+def feedback():
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        feedback_entry = Feedback(
+            name=form.name.data,
+            email=form.email.data,
+            message=form.message.data
+        )
+        db.session.add(feedback_entry)
+        db.session.commit()
+        flash('Feedback submitted successfully!', 'success')
+        return redirect(url_for('feedback'))
+
+    feedback_entries = Feedback.query.all()
+    operating_system = "Your OS"  # Отримайте ОС з якої відбувається доступ
+    return render_template('feedback.html', form=form, feedback_entries=feedback_entries, data={'operating_system': operating_system})
