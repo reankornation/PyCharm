@@ -1,3 +1,4 @@
+import os
 import platform
 from datetime import datetime
 
@@ -227,7 +228,7 @@ def change_login():
     profile_photo = form.profile_picture.data
     if profile_photo:
         filename = secure_filename(profile_photo.filename)
-        filepath = platform.path.join('app/static/images/', filename)
+        filepath = os.path.join('app/static/images/', filename)
         profile_photo.save(filepath)
         current_user.image_file = filename
 
