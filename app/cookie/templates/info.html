@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Info{% endblock %}
+
+{% block content %}
+    <h1>Дані користувача</h1>
+    <p>Привіт, {{ current_user.username }}!</p>
+    <p>Операційна система: {{ data.operating_system }}</p>
+    <p>User-Agent: {{ data.user_agent }}</p>
+    <p>Час зараз: {{ data.time_now }}</p>
+    <a href="{{ url_for('authet.logout') }}">Вийти</a>
+
+    <h2>Інформація про кукі:</h2>
+    <table>
+        <tr>
+            <th>Ключ</th>
+            <th>Значення</th>
+            <th>Термін дії</th>
+        </tr>
+        {% for key, value in cookies.items() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+                <td>{{ request.cookies.get(key).max_age }} сек</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <form action="{{ url_for('cookie.add_cookie') }}" method="POST">
+        <label for="key">Ключ:</label>
+        <input type="text" id="key" name="key" required>
+        <br>
+        <label for="value">Значення:</label>
+        <input type="text" id="value" name="value" required>
+        <br>
+        <input type="submit" value="Додати кукі">
+    </form>
+    <hr>
+    <a href="{{ url_for('cookie.delete_all_cookies') }}">Видалити всі кукі</a>
+{% endblock %}
