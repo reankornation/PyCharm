@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="{{ url_for('master.home') }}">My Portfolio</a>
+    <a class="navbar-brand" href="{{ url_for('home') }}">Моє портфоліо</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -7,36 +7,27 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('master.home') }}">Моє портфоліо</a>
+                <a class="nav-link" href="{{ url_for('home') }}">Моє портфоліо</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('master.page2') }}">Про мене</a>
+                <a class="nav-link" href="{{ url_for('page2') }}">Про мене</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('master.page3') }}">Про проект</a>
+                <a class="nav-link" href="{{ url_for('page3') }}">Про проект</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('master.page4') }}">Мої навички</a>
+                <a class="nav-link" href="{{ url_for('page4') }}">Мої навички</a>
+            </li>
+                <a class="nav-link" href="{{ url_for('todo') }}">ТОДО</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('todo.todo') }}">ТОДО</a>
+                <a class="nav-link" href="{{ url_for('register') }}">Реєстація</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('cookie.info') }}">Info</a>
-            </li>
-            {% if not current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('authet.register') }}">Реєстація</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('authet.login') }}">Логін</a>
-                </li>
-            {% endif %}
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('user.users') }}">Профіль</a>
+                <a class="nav-link" href="{{ url_for('login') }}">Логін</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('user.account') }}">Аккаунт</a>
+                <a class="nav-link" href="{{ url_for('users') }}">Профіль</a>
             </li>
 
             <li class="nav-item">
