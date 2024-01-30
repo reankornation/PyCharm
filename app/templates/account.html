@@ -5,10 +5,12 @@
 
 {% block content %}
     <h1>Дані користувача</h1>
-    <p>Ваше імʼя: {{ current_user.username }}!</p>
-    <p>Ваша електронна адреса: {{ current_user.email }}!</p>
-    <p>Операційна система: {{ data.operating_system }}</p>
-    <p>User-Agent: {{ data.user_agent }}</p>
+    <img class="user_images" src="{{ url_for('static', filename='images/' + current_user.image_file) }}"
+         alt="User Photo">
+    <p>{{ current_user.username }}</p>
+    <p>{{ current_user.email }}</p>
+    <p>Last seen: {{ current_user.last_seen }}</p>
+    <p>About me: {{ current_user.about_me }}</p>
     <p>Час зараз: {{ data.time_now }}</p>
     <a href="{{ url_for('logout') }}">Вийти</a>
 
@@ -16,11 +18,17 @@
         {{ form.csrf_token }}
 
         {{ render_field(form.old_password) }}
-
         {{ render_field(form.new_password) }}
-
         {{ render_field(form.confirm_password) }}
         <input type="submit" value="Змінити пароль">
     </form>
+    <form action="{{ url_for('change_login') }}" method="POST" enctype="multipart/form-data">
+        {{ update_form.csrf_token }}
 
+        {{ render_field(update_form.new_username) }}
+        {{ render_field(update_form.new_email) }}
+        {{ render_field(update_form.about_me) }}
+        {{ render_field(update_form.profile_picture) }}
+        <input type="submit" value="Підтвердити зміни">
+    </form>
 {% endblock %}

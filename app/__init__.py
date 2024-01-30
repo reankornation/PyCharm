@@ -4,11 +4,13 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from config import SECRET_KEY, DATABASE_URI
+from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
+ma = Marshmallow()
 
 
 def create_app():
@@ -19,6 +21,8 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+
+    ma.init_app(app)
     with app.app_context():
         from app.api import api_bp
         app.register_blueprint(api_bp, url_prefix='/api')
