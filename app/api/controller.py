@@ -2,10 +2,12 @@ from flask import jsonify, request
 
 from app import db
 from app.api import api_bp
+from app.api.auth.jwt_utils import JWTUtils
 from app.models import Todo
 
 
 @api_bp.route('/todos', methods=['GET'])
+@JWTUtils.verify_token
 def get_todos():
     todos = Todo.query.all()
     todo_list = []
@@ -20,6 +22,7 @@ def get_todos():
 
 
 @api_bp.route('/todos', methods=['POST'])
+@JWTUtils.verify_token
 def create_todo():
     data = request.get_json()
     new_todo = Todo(title=data['title'], description=data.get('description', ''), status=data.get('status', 0))
@@ -29,6 +32,7 @@ def create_todo():
 
 
 @api_bp.route('/todos/<int:todo_id>', methods=['GET'])
+@JWTUtils.verify_token
 def get_todo(todo_id):
     todo = Todo.query.get_or_404(todo_id)
     return jsonify({
@@ -40,6 +44,7 @@ def get_todo(todo_id):
 
 
 @api_bp.route('/todos/<int:todo_id>', methods=['PUT'])
+@JWTUtils.verify_token
 def update_todo(todo_id):
     todo = Todo.query.get_or_404(todo_id)
     data = request.get_json()
@@ -51,6 +56,7 @@ def update_todo(todo_id):
 
 
 @api_bp.route('/todos/<int:todo_id>', methods=['DELETE'])
+@JWTUtils.verify_token
 def delete_todo(todo_id):
     todo = Todo.query.get_or_404(todo_id)
     db.session.delete(todo)

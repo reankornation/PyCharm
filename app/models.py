@@ -1,5 +1,8 @@
+import datetime
+
 from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy import func
 
 from app import db, login_manager
 
@@ -22,6 +25,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password_hash = db.Column(db.String(60), nullable=False)
+    about_me = db.Column(db.String(256), nullable=True)
+    last_seen = db.Column(db.DateTime, server_default=func.now(), nullable=False)
 
     @property
     def password(self):

@@ -26,6 +26,15 @@ nav ul li {
     padding: 20px;
 }
 
+.user_images {
+    border-radius: 50%;
+    height: 100px;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+}
+
+
 footer {
     margin-top: auto; /* Зміщення футера вниз */
     background-color: #f8f9fa; /* Колір фону футера */
