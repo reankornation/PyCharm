@@ -1,12 +1,12 @@
-import platform
-from datetime import datetime
 import os
+from datetime import datetime
+
 from flask import render_template, request, redirect, url_for
 from flask import session, make_response
 from flask_login import login_required, current_user, logout_user, login_user
 from flask import current_app as app
 from werkzeug.utils import secure_filename
-
+import platform
 from app import db
 from .forms import LoginForm, RegistrationForm, ChangePassword, UpdateAccountForm
 from .forms import TodoForm

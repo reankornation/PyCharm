@@ -26,6 +26,8 @@ def create_app():
     with app.app_context():
         from app.api import api_bp
         app.register_blueprint(api_bp, url_prefix='/api')
+        from .swagger import swagger_bp
+        app.register_blueprint(swagger_bp)
         from app import views
     return app
 
