@@ -1,20 +1,18 @@
 import os
 from datetime import datetime
-
+import platform
 from flask import render_template, request, redirect, url_for
 from flask import session, make_response
 from flask_login import login_required, current_user, logout_user, login_user
 from flask import current_app as app
-from werkzeug.utils import secure_filename
-import platform
 from app import db
-from .forms import LoginForm, RegistrationForm, ChangePassword, UpdateAccountForm
+from .forms import LoginForm, RegistrationForm, ChangePassword
 from .forms import TodoForm
 from .models import Todo, User
 
 
 def get_data():
-    operating_system = platform.system()
+    operating_system = platform.uname()
     user_agent = request.headers.get('User-Agent')
     time_now = datetime.now()
     return {
@@ -53,7 +51,7 @@ from flask import flash
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('info'))
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -69,7 +67,7 @@ def login():
         flash("Login succesfull!", "success")
         if remember:
             login_user(user, remember=True)
-            return redirect(url_for("account"))
+            return redirect(url_for("info"))
         return redirect(url_for("login"))
 
     return render_template("login.html", data=get_data(), form=form)
@@ -204,42 +202,4 @@ def users():
 @login_required
 def account():
     form = ChangePassword()
-    update_form = UpdateAccountForm()
-    update_form.new_email.data = current_user.email
-    update_form.new_username.data = current_user.username
-    update_form.about_me.data = current_user.about_me
-    return render_template('account.html', title='Account', data=get_data(), form=form, update_form=update_form)
-
-
-@app.route('/change_login', methods=['POST'])
-@login_required
-def change_login():
-    form = UpdateAccountForm()
-    if not form.validate_on_submit():
-        # if not current_user.verify_password(form.old_password.data):
-        #     flash("Old password is incorect", "danger")
-        return render_template('account.html', title='Account', data=get_data(), form=ChangePassword(),
-                               update_form=form)
-        # return redirect(url_for('account'))
-    current_user.username = form.new_username.data
-    current_user.email = form.new_email.data
-    current_user.about_me = form.about_me.data
-    profile_photo = form.profile_picture.data
-    if profile_photo:
-        filename = secure_filename(profile_photo.filename)
-        filepath = os.path.join('app/static/images/', filename)
-        profile_photo.save(filepath)
-        current_user.image_file = filename
-
-    db.session.commit()
-    flash("Your data was changed!", "success")
-    return redirect(url_for('account'))
-
-
-@app.after_request
-def update_user_last_seen(resp):
-    if current_user.is_authenticated:
-        current_user.last_seen = datetime.now()
-        db.session.commit()
-        
-    return resp
+    return render_template('account.html', title='Account', data=get_data(), form=form)
