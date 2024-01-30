@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="radio"], input[type="checkbox"] {
+            margin-bottom: 15px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        h2, p {
+            color: #333;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<form action="/cgi-bin/code.py" method="post">
+    <label for="favorite_color">Ваш улюблений колір:</label>
+    <select name="favorite_color">
+        <option value="red">Червоний</option>
+        <option value="blue">Синій</option>
+        <option value="green">Зелений</option>
+        <option value="yellow">Жовтий</option>
+    </select>
+    <br>
+
+    <label for="music_genre">Улюблений музичний жанр:</label>
+    <input type="radio" name="music_genre" value="rock"> Рок
+    <input type="radio" name="music_genre" value="pop"> Поп
+    <input type="radio" name="music_genre" value="hip_hop"> Хіп-хоп
+    <br>
+
+    <label for="like_coffee">Чи вам подобається кава?</label>
+    <input type="checkbox" name="like_coffee" value="yes">
+    <br>
+
+    <input type="submit" value="Send form">
+</form>
+
+</body>
+</html>
